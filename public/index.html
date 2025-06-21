@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Examen Aplicaciones Web - Interfaz REST Casas</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+    .container { max-width: 500px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 2em; }
+    h1 { text-align: center; color: #2c3e50; }
+    .actions { display: flex; gap: 1em; margin-bottom: 1em; }
+    .actions input[type="number"] { flex: 1; padding: 0.5em; border: 1px solid #ccc; border-radius: 4px; }
+    .actions button { padding: 0.5em 1em; border: none; border-radius: 4px; background: #3498db; color: #fff; cursor: pointer; transition: background 0.2s; }
+    .actions button:hover { background: #217dbb; }
+    #result { background: #f4f4f4; border-radius: 4px; padding: 1em; min-height: 2em; font-family: 'Fira Mono', monospace; white-space: pre-wrap; margin-top: 1em; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Examen Aplicaciones Web - Interfaz REST Casas</h1>
+    <div class="actions">
+      <button id="btn-todas">Mostrar todas las casas</button>
+    </div>
+    <div class="actions">
+      <input type="number" id="input-id" placeholder="ID de la casa" min="1">
+      <button id="btn-buscar">Buscar casa por ID</button>
+    </div>
+    <div id="result"></div>
+  </div>
+  <script>
+    const result = document.getElementById('result');
+    document.getElementById('btn-todas').onclick = async () => {
+      result.textContent = 'Cargando...';
+      try {
+        const res = await fetch('/casa');
+        if (!res.ok) throw new Error('Error al obtener casas');
+        const data = await res.json();
+        result.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        result.textContent = 'Error: ' + err.message;
+      }
+    };
+    document.getElementById('btn-buscar').onclick = async () => {
+      const id = document.getElementById('input-id').value;
+      if (!id) {
+        result.textContent = 'Por favor, ingresa un ID.';
+        return;
+      }
+      result.textContent = 'Buscando...';
+      try {
+        const res = await fetch(`/casa?idCasa=${encodeURIComponent(id)}`);
+        if (res.status === 404) {
+          const text = await res.text();
+          result.textContent = text;
+        } else if (!res.ok) {
+          throw new Error('Error al buscar la casa');
+        } else {
+          const data = await res.json();
+          result.textContent = JSON.stringify(data, null, 2);
+        }
+      } catch (err) {
+        result.textContent = 'Error: ' + err.message;
+      }
+    };
+  </script>
+</body>
+</html>
